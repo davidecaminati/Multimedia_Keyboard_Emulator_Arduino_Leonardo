@@ -7,6 +7,9 @@
 
   You may also use SingleConsumer to use a single report.
 
+  Import this library
+  https://github.com/NicoHood/HID
+
   See HID Project documentation for more Consumer keys.
   https://github.com/NicoHood/HID/wiki/Consumer-API
 
@@ -19,35 +22,37 @@
 const int pinLed = LED_BUILTIN;
 const int pinButtonExt = 4;
 const int pinButtonGreen = 7;
+bool pressed_on_start = false;
+
 
 void setup() {
   pinMode(pinLed, OUTPUT);
   pinMode(pinButtonExt, INPUT_PULLUP);
   pinMode(pinButtonGreen, INPUT_PULLUP);
-
-  // Sends a clean report to the host. This is important on any Arduino type.
-  Consumer.begin();
+  pressed_on_start = digitalRead(pinButtonGreen);
+  
+  if (pressed_on_start)
+  {
+    Consumer.begin();
+  }
+  else
+  {
+    Keyboard.begin();
+  }
 }
 
 void loop() {
-  // External
-  if (!digitalRead(pinButtonExt)) {
-    digitalWrite(pinLed, HIGH);
-
-    // See HID Project documentation for more Consumer keys
-    Consumer.write(MEDIA_PLAY_PAUSE);
-
-    // Simple debounce
-    delay(300);
-    digitalWrite(pinLed, LOW);
-  }
-  // Green
   if (!digitalRead(pinButtonGreen)) {
     digitalWrite(pinLed, HIGH);
-
-    // See HID Project documentation for more Consumer keys
-    Consumer.write(MEDIA_PLAY_PAUSE);
-
+    if (pressed_on_start){                                    
+      // Send Play/Pause
+      Consumer.write(MEDIA_PLAY_PAUSE);
+    }
+    else
+    {
+      // Send Space
+      Keyboard.print(" ");
+    }
     // Simple debounce
     delay(300);
     digitalWrite(pinLed, LOW);
